@@ -5,6 +5,9 @@
     "@fullcalendar/react": "^6.1.10",
     "@fullcalendar/timegrid": "^6.1.10"
   },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
   "scripts": {
     "dev": "vite"
   }
