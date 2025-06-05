@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { MapPin, Phone, Plus, Pencil, Trash2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import DatePicker from 'react-datepicker';
 
 interface Appointment {
   id: string;
@@ -33,10 +30,10 @@ const Appointments = () => {
   const [showModal, setShowModal] = useState(false);
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    scheduled_at: '',
     clinic_id: '',
   });
 
@@ -86,10 +83,10 @@ const Appointments = () => {
 
   const handleEdit = (appointment: Appointment) => {
     setEditingAppointment(appointment);
+    setSelectedDate(new Date(appointment.scheduled_at));
     setFormData({
       title: appointment.title,
       description: appointment.description || '',
-      scheduled_at: format(new Date(appointment.scheduled_at), "yyyy-MM-dd'T'HH:mm"),
       clinic_id: appointment.clinic_id,
     });
     setShowModal(true);
@@ -112,21 +109,6 @@ const Appointments = () => {
     }
   };
 
-  const handleDateSelect = (selectInfo: any) => {
-    setFormData({
-      ...formData,
-      scheduled_at: format(selectInfo.start, "yyyy-MM-dd'T'HH:mm"),
-    });
-    setShowModal(true);
-  };
-
-  const handleEventClick = (clickInfo: any) => {
-    const appointment = appointments.find(app => app.id === clickInfo.event.id);
-    if (appointment) {
-      handleEdit(appointment);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -138,11 +120,16 @@ const Appointments = () => {
         throw new Error('Selected clinic not found');
       }
 
+      if (!selectedDate) {
+        throw new Error('Please select a date and time');
+      }
+
       if (editingAppointment) {
         const { error } = await supabase
           .from('appointments')
           .update({
             ...formData,
+            scheduled_at: selectedDate.toISOString(),
             location: selectedClinic.address,
           })
           .eq('id', editingAppointment.id);
@@ -153,6 +140,7 @@ const Appointments = () => {
           .from('appointments')
           .insert({
             patient_id: user.id,
+            scheduled_at: selectedDate.toISOString(),
             location: selectedClinic.address,
             ...formData,
           });
@@ -164,9 +152,9 @@ const Appointments = () => {
       setFormData({
         title: '',
         description: '',
-        scheduled_at: '',
         clinic_id: '',
       });
+      setSelectedDate(null);
       setEditingAppointment(null);
       fetchAppointments();
     } catch (error) {
@@ -180,21 +168,10 @@ const Appointments = () => {
     setFormData({
       title: '',
       description: '',
-      scheduled_at: '',
       clinic_id: '',
     });
+    setSelectedDate(null);
   };
-
-  const calendarEvents = appointments.map(appointment => ({
-    id: appointment.id,
-    title: appointment.title,
-    start: appointment.scheduled_at,
-    end: new Date(new Date(appointment.scheduled_at).getTime() + 60 * 60 * 1000), // 1 hour duration
-    extendedProps: {
-      description: appointment.description,
-      clinic: appointment.clinic,
-    },
-  }));
 
   return (
     <div className="space-y-8">
@@ -210,36 +187,53 @@ const Appointments = () => {
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="timeGridWeek"
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay',
-          }}
-          events={calendarEvents}
-          selectable={true}
-          selectMirror={true}
-          dayMaxEvents={true}
-          weekends={true}
-          select={handleDateSelect}
-          eventClick={handleEventClick}
-          height="auto"
-          eventTimeFormat={{
-            hour: '2-digit',
-            minute: '2-digit',
-            meridiem: false,
-          }}
-          slotMinTime="08:00:00"
-          slotMaxTime="20:00:00"
-          allDaySlot={false}
-          slotDuration="00:30:00"
-          expandRows={true}
-          stickyHeaderDates={true}
-          nowIndicator={true}
-          eventClassNames="cursor-pointer"
-        />
+        {appointments.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 dark:text-gray-400">No appointments scheduled</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {appointments.map((appointment) => (
+              <div
+                key={appointment.id}
+                className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
+              >
+                <div className="flex-1">
+                  <h3 className="font-medium text-gray-900 dark:text-white">{appointment.title}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {format(new Date(appointment.scheduled_at), 'PPp')}
+                  </p>
+                  {appointment.clinic && (
+                    <div className="mt-2 space-y-1">
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        {appointment.clinic.address}
+                      </div>
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <Phone className="h-4 w-4 mr-2" />
+                        {appointment.clinic.phone}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleEdit(appointment)}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
+                  >
+                    <Pencil className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(appointment.id)}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {showModal && (
@@ -293,11 +287,15 @@ const Appointments = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Date & Time
                 </label>
-                <input
-                  type="datetime-local"
-                  value={formData.scheduled_at}
-                  onChange={(e) => setFormData({ ...formData, scheduled_at: e.target.value })}
-                  className="w-full px-4 py-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={(date) => setSelectedDate(date)}
+                  showTimeSelect
+                  timeFormat="HH:mm"
+                  timeIntervals={15}
+                  dateFormat="MMMM d, yyyy h:mm aa"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholderText="Select date and time"
                   required
                 />
               </div>

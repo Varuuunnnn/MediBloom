@@ -1,17 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import { format } from 'date-fns';
+import DatePicker from 'react-datepicker';
 
 const Onboarding = () => {
-  const [showCalendar, setShowCalendar] = useState(false);
   const [formData, setFormData] = useState({
     condition: '',
     height: '',
     weight: '',
-    surgery_date: '',
+    surgery_date: null as Date | null,
     allergies: '',
     blood_type: '',
     emergency_contact: '',
@@ -45,14 +41,6 @@ const Onboarding = () => {
     );
   }, [formData]);
 
-  const handleDateSelect = (selectInfo: any) => {
-    setFormData({
-      ...formData,
-      surgery_date: format(selectInfo.start, 'yyyy-MM-dd'),
-    });
-    setShowCalendar(false);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -66,6 +54,7 @@ const Onboarding = () => {
       const { error } = await supabase.from('patient_details').insert({
         patient_id: user.id,
         ...formData,
+        surgery_date: formData.surgery_date ? format(formData.surgery_date, 'yyyy-MM-dd') : null,
       });
 
       if (error) throw error;
@@ -126,33 +115,14 @@ const Onboarding = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Surgery Date (if any)</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={formData.surgery_date}
-                  onClick={() => setShowCalendar(true)}
-                  readOnly
-                  className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white cursor-pointer"
-                  placeholder="Click to select date"
-                />
-                {showCalendar && (
-                  <div className="absolute z-50 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-                    <FullCalendar
-                      plugins={[dayGridPlugin, interactionPlugin]}
-                      initialView="dayGridMonth"
-                      headerToolbar={{
-                        left: 'prev,next',
-                        center: 'title',
-                        right: 'today',
-                      }}
-                      selectable={true}
-                      select={handleDateSelect}
-                      height="auto"
-                      aspectRatio={1.5}
-                    />
-                  </div>
-                )}
-              </div>
+              <DatePicker
+                selected={formData.surgery_date}
+                onChange={(date) => setFormData({ ...formData, surgery_date: date })}
+                dateFormat="MMMM d, yyyy"
+                className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholderText="Select date"
+                isClearable
+              />
             </div>
 
             <div>
