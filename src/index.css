@@ -1,7 +1,7 @@
 @import '@fontsource/inter';
-@import '@fullcalendar/core/main.css';
-@import '@fullcalendar/daygrid/main.css';
-@import '@fullcalendar/timegrid/main.css';
+@import '@fullcalendar/core/dist/main.css';
+@import '@fullcalendar/daygrid/dist/main.css';
+@import '@fullcalendar/timegrid/dist/main.css';
 
 @tailwind base;
 @tailwind components;
