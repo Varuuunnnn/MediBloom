@@ -146,7 +146,7 @@ const Auth = () => {
             {!isLogin && (
               <>
                 <div>
-                  <label htmlFor="fullName" className={`block text-sm font-medium ${
+                  <label htmlFor="fullName\" className={`block text-sm font-medium ${
                     isDark ? 'text-gray-200' : 'text-gray-700'
                   }`}>
                     Full Name
