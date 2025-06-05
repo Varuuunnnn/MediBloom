@@ -142,7 +142,7 @@ const Auth = () => {
             {!isLogin && (
               <>
                 <div>
-                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="fullName\" className="block text-sm font-medium text-gray-700">
                     Full Name
                   </label>
                   <div className="mt-1">
