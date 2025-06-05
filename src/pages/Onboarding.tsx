@@ -1,14 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import { format } from 'date-fns';
 
 const Onboarding = () => {
+  const [showCalendar, setShowCalendar] = useState(false);
   const [formData, setFormData] = useState({
     condition: '',
     height: '',
     weight: '',
-    surgery_date: '', // Changed to match database column name
+    surgery_date: '',
     allergies: '',
-    blood_type: '', // Changed to match database column name
+    blood_type: '',
     emergency_contact: '',
     emergency_phone: '',
   });
@@ -40,6 +45,14 @@ const Onboarding = () => {
     );
   }, [formData]);
 
+  const handleDateSelect = (selectInfo: any) => {
+    setFormData({
+      ...formData,
+      surgery_date: format(selectInfo.start, 'yyyy-MM-dd'),
+    });
+    setShowCalendar(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -65,18 +78,18 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow px-6 py-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Complete Your Medical Profile</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow px-6 py-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Complete Your Medical Profile</h2>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Medical Condition</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Medical Condition</label>
               <select
                 value={formData.condition}
                 onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 required
               >
                 <option value="">Select Medical Condition</option>
@@ -90,53 +103,74 @@ const Onboarding = () => {
 
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Height (cm)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Height (cm)</label>
                 <input
                   type="number"
                   value={formData.height}
                   onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Weight (kg)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Weight (kg)</label>
                 <input
                   type="number"
                   value={formData.weight}
                   onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Last Surgery Date (if any)</label>
-              <input
-                type="date"
-                value={formData.surgery_date}
-                onChange={(e) => setFormData({ ...formData, surgery_date: e.target.value })}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-              />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Surgery Date (if any)</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.surgery_date}
+                  onClick={() => setShowCalendar(true)}
+                  readOnly
+                  className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white cursor-pointer"
+                  placeholder="Click to select date"
+                />
+                {showCalendar && (
+                  <div className="absolute z-50 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
+                    <FullCalendar
+                      plugins={[dayGridPlugin, interactionPlugin]}
+                      initialView="dayGridMonth"
+                      headerToolbar={{
+                        left: 'prev,next',
+                        center: 'title',
+                        right: 'today',
+                      }}
+                      selectable={true}
+                      select={handleDateSelect}
+                      height="auto"
+                      aspectRatio={1.5}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Food Allergies</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Food Allergies</label>
               <textarea
                 value={formData.allergies}
                 onChange={(e) => setFormData({ ...formData, allergies: e.target.value })}
                 rows={3}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Blood Type</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Blood Type</label>
               <select
                 value={formData.blood_type}
                 onChange={(e) => setFormData({ ...formData, blood_type: e.target.value })}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 required
               >
                 <option value="">Select Blood Type</option>
@@ -153,22 +187,22 @@ const Onboarding = () => {
 
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Emergency Contact Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Emergency Contact Name</label>
                 <input
                   type="text"
                   value={formData.emergency_contact}
                   onChange={(e) => setFormData({ ...formData, emergency_contact: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Emergency Contact Phone</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Emergency Contact Phone</label>
                 <input
                   type="tel"
                   value={formData.emergency_phone}
                   onChange={(e) => setFormData({ ...formData, emergency_phone: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
               </div>
@@ -181,7 +215,7 @@ const Onboarding = () => {
                 className={`px-6 py-2 rounded-md font-medium transition-all duration-200 ${
                   isFormValid
                     ? 'bg-primary-600 text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                 }`}
               >
                 Complete Profile
