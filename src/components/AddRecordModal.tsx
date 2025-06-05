@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import DatePicker from 'react-datepicker';
 import { format } from 'date-fns';
 
 interface AddRecordModalProps {
@@ -22,7 +21,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
     medicationName: '',
     dosage: '',
     frequency: '',
-    startDate: null as Date | null,
+    startDate: '',
   });
 
   if (!isOpen) return null;
@@ -63,7 +62,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
             name: formData.medicationName,
             dosage: formData.dosage,
             frequency: formData.frequency,
-            start_date: formData.startDate ? format(formData.startDate, 'yyyy-MM-dd') : null,
+            start_date: formData.startDate,
           });
           break;
       }
@@ -80,7 +79,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
         medicationName: '',
         dosage: '',
         frequency: '',
-        startDate: null,
+        startDate: '',
       });
     } catch (error) {
       console.error('Error adding record:', error);
@@ -264,12 +263,11 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Start Date
                 </label>
-                <DatePicker
-                  selected={formData.startDate}
-                  onChange={(date) => setFormData({ ...formData, startDate: date })}
-                  dateFormat="MMMM d, yyyy"
+                <input
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholderText="Select start date"
                   required
                 />
               </div>

@@ -7,7 +7,7 @@ const Onboarding = () => {
     condition: '',
     height: '',
     weight: '',
-    surgery_date: null as Date | null,
+    surgery_date: '',
     allergies: '',
     blood_type: '',
     emergency_contact: '',
@@ -54,7 +54,6 @@ const Onboarding = () => {
       const { error } = await supabase.from('patient_details').insert({
         patient_id: user.id,
         ...formData,
-        surgery_date: formData.surgery_date ? format(formData.surgery_date, 'yyyy-MM-dd') : null,
       });
 
       if (error) throw error;
@@ -117,13 +116,11 @@ const Onboarding = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Surgery Date (if any)</label>
-              <DatePicker
-                selected={formData.surgery_date}
-                onChange={(date) => setFormData({ ...formData, surgery_date: date })}
-                dateFormat="MMMM d, yyyy"
+              <input
+                type="date"
+                value={formData.surgery_date}
+                onChange={(e) => setFormData({ ...formData, surgery_date: e.target.value })}
                 className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholderText="Select surgery date if applicable"
-                isClearable
               />
             </div>
 
