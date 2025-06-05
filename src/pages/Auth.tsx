@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Activity } from 'lucide-react';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 const Auth = () => {
+  const [isDark] = useDarkMode();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -96,10 +98,8 @@ const Auth = () => {
           throw new Error('Failed to create patient record after multiple attempts');
         }
 
-        // Show success message and switch to login view
         setSuccessMessage('Registration successful! Please sign in with your credentials.');
         setIsLogin(true);
-        // Clear form
         setEmail('');
         setPassword('');
         setFullName('');
@@ -117,24 +117,28 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className={`min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 ${
+      isDark ? 'dark bg-gray-900' : 'bg-gray-50'
+    }`}>
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <Activity className="h-12 w-12 text-primary-600" />
+          <Activity className={`h-12 w-12 ${isDark ? 'text-primary-400' : 'text-primary-600'}`} />
         </div>
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+        <h2 className={`mt-6 text-center text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
           MediBloom
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className={`mt-2 text-center text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
           Your Virtual Nurse
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className={`py-8 px-4 shadow sm:rounded-lg sm:px-10 ${
+          isDark ? 'bg-gray-800' : 'bg-white'
+        }`}>
           {successMessage && (
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
-              <p className="text-sm text-green-600">{successMessage}</p>
+            <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900 rounded-md">
+              <p className="text-sm text-green-600 dark:text-green-400">{successMessage}</p>
             </div>
           )}
 
@@ -142,7 +146,9 @@ const Auth = () => {
             {!isLogin && (
               <>
                 <div>
-                  <label htmlFor="fullName\" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="fullName" className={`block text-sm font-medium ${
+                    isDark ? 'text-gray-200' : 'text-gray-700'
+                  }`}>
                     Full Name
                   </label>
                   <div className="mt-1">
@@ -153,13 +159,19 @@ const Auth = () => {
                       required
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm ${
+                        isDark
+                          ? 'bg-gray-700 border-gray-600 text-white'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="dateOfBirth" className={`block text-sm font-medium ${
+                    isDark ? 'text-gray-200' : 'text-gray-700'
+                  }`}>
                     Date of Birth
                   </label>
                   <div className="mt-1">
@@ -170,7 +182,11 @@ const Auth = () => {
                       required
                       value={dateOfBirth}
                       onChange={(e) => setDateOfBirth(e.target.value)}
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm ${
+                        isDark
+                          ? 'bg-gray-700 border-gray-600 text-white'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
                     />
                   </div>
                 </div>
@@ -178,7 +194,9 @@ const Auth = () => {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className={`block text-sm font-medium ${
+                isDark ? 'text-gray-200' : 'text-gray-700'
+              }`}>
                 Email address
               </label>
               <div className="mt-1">
@@ -190,13 +208,19 @@ const Auth = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm ${
+                    isDark
+                      ? 'bg-gray-700 border-gray-600 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className={`block text-sm font-medium ${
+                isDark ? 'text-gray-200' : 'text-gray-700'
+              }`}>
                 Password
               </label>
               <div className="mt-1">
@@ -209,17 +233,25 @@ const Auth = () => {
                   minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm ${
+                    isDark
+                      ? 'bg-gray-700 border-gray-600 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
                 />
-                <p className="mt-1 text-sm text-gray-500">
+                <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                   Password must be at least 6 characters long
                 </p>
               </div>
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className={`p-4 rounded-md ${
+                isDark
+                  ? 'bg-red-900/20 border border-red-900'
+                  : 'bg-red-50 border border-red-200'
+              }`}>
+                <p className={`text-sm ${isDark ? 'text-red-400' : 'text-red-600'}`}>{error}</p>
               </div>
             )}
 
@@ -227,7 +259,11 @@ const Auth = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition-colors duration-200 ${
+                  isDark
+                    ? 'bg-primary-500 hover:bg-primary-600'
+                    : 'bg-primary-600 hover:bg-primary-700'
+                } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500`}
               >
                 {isLoading ? 'Processing...' : (isLogin ? 'Sign in' : 'Sign up')}
               </button>
@@ -245,7 +281,9 @@ const Auth = () => {
                 setFullName('');
                 setDateOfBirth('');
               }}
-              className="w-full text-center text-sm text-primary-600 hover:text-primary-500"
+              className={`w-full text-center text-sm ${
+                isDark ? 'text-primary-400 hover:text-primary-300' : 'text-primary-600 hover:text-primary-500'
+              }`}
             >
               {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
             </button>
