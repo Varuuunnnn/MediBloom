@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Activity } from 'lucide-react';
 
@@ -10,18 +10,26 @@ const Auth = () => {
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   const extractErrorMessage = (error: any): string => {
     if (error instanceof Error) {
       return error.message;
     }
     
-    // Handle Supabase error format
     if (error.message) {
       return error.message;
     }
 
-    // Try to parse error body if it exists
     if (typeof error.body === 'string') {
       try {
         const parsedBody = JSON.parse(error.body);
@@ -39,6 +47,7 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
     setIsLoading(true);
 
     try {
@@ -49,7 +58,6 @@ const Auth = () => {
         });
         if (signInError) throw signInError;
       } else {
-        // First create the auth user
         const { data: { user }, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -61,7 +69,6 @@ const Auth = () => {
           throw new Error('Signup failed - no user returned');
         }
 
-        // Then create the patient record with a retry mechanism
         let retryCount = 0;
         const maxRetries = 3;
         let patientCreated = false;
@@ -77,12 +84,10 @@ const Auth = () => {
           if (!insertError) {
             patientCreated = true;
           } else {
-            // If it's not a duplicate error, throw it
             if (!insertError.message.includes('duplicate key')) {
               throw insertError;
             }
             retryCount++;
-            // Small delay before retry
             await new Promise(resolve => setTimeout(resolve, 1000));
           }
         }
@@ -90,11 +95,19 @@ const Auth = () => {
         if (!patientCreated) {
           throw new Error('Failed to create patient record after multiple attempts');
         }
+
+        // Show success message and switch to login view
+        setSuccessMessage('Registration successful! Please sign in with your credentials.');
+        setIsLogin(true);
+        // Clear form
+        setEmail('');
+        setPassword('');
+        setFullName('');
+        setDateOfBirth('');
       }
     } catch (error) {
       const errorMessage = extractErrorMessage(error);
       setError(errorMessage);
-      // If there was an error during signup, sign out the user to clean up the auth state
       if (!isLogin) {
         await supabase.auth.signOut();
       }
@@ -119,11 +132,17 @@ const Auth = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {successMessage && (
+            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-sm text-green-600">{successMessage}</p>
+            </div>
+          )}
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             {!isLogin && (
               <>
                 <div>
-                  <label htmlFor="fullName\" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
                     Full Name
                   </label>
                   <div className="mt-1">
@@ -199,7 +218,9 @@ const Auth = () => {
             </div>
 
             {error && (
-              <div className="text-red-600 text-sm">{error}</div>
+              <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
             )}
 
             <div>
@@ -215,7 +236,15 @@ const Auth = () => {
 
           <div className="mt-6">
             <button
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError('');
+                setSuccessMessage('');
+                setEmail('');
+                setPassword('');
+                setFullName('');
+                setDateOfBirth('');
+              }}
               className="w-full text-center text-sm text-primary-600 hover:text-primary-500"
             >
               {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
