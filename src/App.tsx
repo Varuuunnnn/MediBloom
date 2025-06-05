@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
+import HealthMetrics from './pages/HealthMetrics';
 import Sidebar from './components/Sidebar';
 import Auth from './pages/Auth';
 import Onboarding from './pages/Onboarding';
@@ -12,6 +13,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [currentPage, setCurrentPage] = useState('dashboard');
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -27,7 +29,6 @@ function App() {
   useEffect(() => {
     const checkUserAndOnboarding = async () => {
       if (session?.user) {
-        // First check if the user exists in the patients table
         const { data: patientData, error: patientError } = await supabase
           .from('patients')
           .select('id')
@@ -35,13 +36,11 @@ function App() {
           .maybeSingle();
 
         if (patientError || !patientData) {
-          // If there's an error or no patient record exists, sign out the user
           await supabase.auth.signOut();
           setSession(null);
           return;
         }
 
-        // Only check onboarding if the patient record exists
         const { data: detailsData } = await supabase
           .from('patient_details')
           .select('*')
@@ -75,14 +74,23 @@ function App() {
     return <Onboarding />;
   }
 
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'health-metrics':
+        return <HealthMetrics />;
+      default:
+        return <Dashboard />;
+    }
+  };
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Sidebar onNavigate={setCurrentPage} currentPage={currentPage} />
       <div className="flex-1 flex flex-col">
         <Navbar />
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <Dashboard />
+            {renderPage()}
           </div>
         </main>
       </div>

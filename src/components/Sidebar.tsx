@@ -2,7 +2,12 @@ import React from 'react';
 import { Activity, Calendar, FileText, Home, PlusCircle, Users, Bell, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-const Sidebar = () => {
+interface SidebarProps {
+  onNavigate: (page: string) => void;
+  currentPage: string;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentPage }) => {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -12,12 +17,12 @@ const Sidebar = () => {
   };
 
   const menuItems = [
-    { icon: Home, label: 'Dashboard', action: () => console.log('Dashboard clicked') },
-    { icon: Activity, label: 'Health Metrics', action: () => console.log('Health Metrics clicked') },
-    { icon: Calendar, label: 'Appointments', action: () => console.log('Appointments clicked') },
-    { icon: FileText, label: 'Documents', action: () => console.log('Documents clicked') },
-    { icon: Users, label: 'Caregivers', action: () => console.log('Caregivers clicked') },
-    { icon: Bell, label: 'Notifications', action: () => console.log('Notifications clicked') }
+    { icon: Home, label: 'Dashboard', id: 'dashboard' },
+    { icon: Activity, label: 'Health Metrics', id: 'health-metrics' },
+    { icon: Calendar, label: 'Appointments', id: 'appointments' },
+    { icon: FileText, label: 'Documents', id: 'documents' },
+    { icon: Users, label: 'Caregivers', id: 'caregivers' },
+    { icon: Bell, label: 'Notifications', id: 'notifications' }
   ];
 
   return (
@@ -34,9 +39,13 @@ const Sidebar = () => {
           <nav className="flex-1 px-4 py-4 space-y-1">
             {menuItems.map((item) => (
               <button
-                key={item.label}
-                onClick={item.action}
-                className="flex items-center w-full px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
+                key={item.id}
+                onClick={() => onNavigate(item.id)}
+                className={`flex items-center w-full px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                  currentPage === item.id
+                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
               >
                 <item.icon className="h-5 w-5 mr-3" />
                 {item.label}
