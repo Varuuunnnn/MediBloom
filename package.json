@@ -12,11 +12,6 @@
   },
   "dependencies": {
     "@fontsource/inter": "^5.0.16",
-    "@fullcalendar/core": "^6.1.10",
-    "@fullcalendar/daygrid": "^6.1.10",
-    "@fullcalendar/interaction": "^6.1.10",
-    "@fullcalendar/react": "^6.1.10",
-    "@fullcalendar/timegrid": "^6.1.10",
     "@supabase/supabase-js": "^2.39.1",
     "date-fns": "^2.30.0",
     "framer-motion": "^10.16.16",
@@ -24,6 +19,7 @@
     "jspdf-autotable": "^3.8.1",
     "lucide-react": "^0.294.0",
     "react": "^18.2.0",
+    "react-datepicker": "^4.25.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.21.0",
     "recharts": "^2.10.3",
@@ -31,6 +27,7 @@
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
+    "@types/react-datepicker": "^4.19.6",
     "@types/react-dom": "^18.2.15",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
