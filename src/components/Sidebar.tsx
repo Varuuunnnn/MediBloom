@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Calendar, FileText, Home, PlusCircle, Settings, Users, Bell, LogOut } from 'lucide-react';
+import { Activity, Calendar, FileText, Home, PlusCircle, Users, Bell, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Sidebar = () => {
@@ -17,8 +17,7 @@ const Sidebar = () => {
     { icon: Calendar, label: 'Appointments', action: () => console.log('Appointments clicked') },
     { icon: FileText, label: 'Documents', action: () => console.log('Documents clicked') },
     { icon: Users, label: 'Caregivers', action: () => console.log('Caregivers clicked') },
-    { icon: Bell, label: 'Notifications', action: () => console.log('Notifications clicked') },
-    { icon: Settings, label: 'Settings', action: () => console.log('Settings clicked') },
+    { icon: Bell, label: 'Notifications', action: () => console.log('Notifications clicked') }
   ];
 
   return (
