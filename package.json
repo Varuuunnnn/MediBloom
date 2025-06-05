@@ -21,7 +21,8 @@
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.1",
     "framer-motion": "^10.16.4",
-    "recharts": "^2.10.3"
+    "recharts": "^2.10.3",
+    "react-router-dom": "^6.20.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
