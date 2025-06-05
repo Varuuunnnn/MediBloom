@@ -18,7 +18,7 @@ const Navbar = () => {
                 </div>
                 <input
                   type="search"
-                  placeholder="Search"
+                  placeholder="Search records, medications..."
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm placeholder-gray-500 dark:placeholder-gray-400 dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>

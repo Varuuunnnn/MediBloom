@@ -123,6 +123,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
                     value={formData.systolic}
                     onChange={(e) => setFormData({ ...formData, systolic: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="Enter systolic pressure"
                     required
                   />
                 </div>
@@ -135,6 +136,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
                     value={formData.diastolic}
                     onChange={(e) => setFormData({ ...formData, diastolic: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="Enter diastolic pressure"
                     required
                   />
                 </div>
@@ -149,6 +151,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
                   value={formData.temperature}
                   onChange={(e) => setFormData({ ...formData, temperature: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter temperature"
                   required
                 />
               </div>
@@ -161,6 +164,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
                   value={formData.heartRate}
                   onChange={(e) => setFormData({ ...formData, heartRate: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter heart rate"
                   required
                 />
               </div>
@@ -178,6 +182,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
                   value={formData.symptom}
                   onChange={(e) => setFormData({ ...formData, symptom: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter symptom description"
                   required
                 />
               </div>
@@ -207,6 +212,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Add any additional notes or observations"
                   rows={3}
                 />
               </div>
@@ -224,6 +230,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
                   value={formData.medicationName}
                   onChange={(e) => setFormData({ ...formData, medicationName: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter medication name"
                   required
                 />
               </div>
@@ -236,6 +243,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
                   value={formData.dosage}
                   onChange={(e) => setFormData({ ...formData, dosage: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter dosage (e.g., 50mg)"
                   required
                 />
               </div>
@@ -248,6 +256,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
                   value={formData.frequency}
                   onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter frequency (e.g., twice daily)"
                   required
                 />
               </div>
@@ -260,7 +269,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ isOpen, onClose }) => {
                   onChange={(date) => setFormData({ ...formData, startDate: date })}
                   dateFormat="MMMM d, yyyy"
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholderText="Select date"
+                  placeholderText="Select start date"
                   required
                 />
               </div>
