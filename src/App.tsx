@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import HealthMetrics from './pages/HealthMetrics';
+import Appointments from './pages/Appointments';
 import Sidebar from './components/Sidebar';
 import Auth from './pages/Auth';
 import Onboarding from './pages/Onboarding';
@@ -78,6 +79,8 @@ function App() {
     switch (currentPage) {
       case 'health-metrics':
         return <HealthMetrics />;
+      case 'appointments':
+        return <Appointments />;
       default:
         return <Dashboard />;
     }
