@@ -4,12 +4,14 @@ import Dashboard from './pages/Dashboard';
 import Sidebar from './components/Sidebar';
 import Auth from './pages/Auth';
 import Onboarding from './pages/Onboarding';
+import Landing from './pages/Landing';
 import { supabase } from './lib/supabase';
 
 function App() {
   const [session, setSession] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -59,6 +61,10 @@ function App() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     );
+  }
+
+  if (!session && !showAuth) {
+    return <Landing onGetStarted={() => setShowAuth(true)} />;
   }
 
   if (!session) {
