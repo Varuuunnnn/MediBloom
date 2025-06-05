@@ -23,29 +23,6 @@ const Auth = () => {
     }
   }, [successMessage]);
 
-  const extractErrorMessage = (error: any): string => {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    
-    if (error.message) {
-      return error.message;
-    }
-
-    if (typeof error.body === 'string') {
-      try {
-        const parsedBody = JSON.parse(error.body);
-        if (parsedBody.message) {
-          return parsedBody.message;
-        }
-      } catch (e) {
-        // Parsing failed, fall through to default
-      }
-    }
-
-    return 'An unexpected error occurred. Please try again.';
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -71,32 +48,14 @@ const Auth = () => {
           throw new Error('Signup failed - no user returned');
         }
 
-        let retryCount = 0;
-        const maxRetries = 3;
-        let patientCreated = false;
+        const { error: insertError } = await supabase.from('patients').insert({
+          id: user.id,
+          email,
+          full_name: fullName,
+          date_of_birth: dateOfBirth,
+        });
 
-        while (retryCount < maxRetries && !patientCreated) {
-          const { error: insertError } = await supabase.from('patients').insert({
-            id: user.id,
-            email,
-            full_name: fullName,
-            date_of_birth: dateOfBirth,
-          });
-
-          if (!insertError) {
-            patientCreated = true;
-          } else {
-            if (!insertError.message.includes('duplicate key')) {
-              throw insertError;
-            }
-            retryCount++;
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        }
-
-        if (!patientCreated) {
-          throw new Error('Failed to create patient record after multiple attempts');
-        }
+        if (insertError) throw insertError;
 
         setSuccessMessage('Registration successful! Please sign in with your credentials.');
         setIsLogin(true);
@@ -105,9 +64,8 @@ const Auth = () => {
         setFullName('');
         setDateOfBirth('');
       }
-    } catch (error) {
-      const errorMessage = extractErrorMessage(error);
-      setError(errorMessage);
+    } catch (error: any) {
+      setError(error.message);
       if (!isLogin) {
         await supabase.auth.signOut();
       }
@@ -146,7 +104,7 @@ const Auth = () => {
             {!isLogin && (
               <>
                 <div>
-                  <label htmlFor="fullName\" className={`block text-sm font-medium ${
+                  <label htmlFor="fullName" className={`block text-sm font-medium ${
                     isDark ? 'text-gray-200' : 'text-gray-700'
                   }`}>
                     Full Name
@@ -159,6 +117,7 @@ const Auth = () => {
                       required
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Enter your full name"
                       className={`appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm ${
                         isDark
                           ? 'bg-gray-700 border-gray-600 text-white'
@@ -182,6 +141,7 @@ const Auth = () => {
                       required
                       value={dateOfBirth}
                       onChange={(e) => setDateOfBirth(e.target.value)}
+                      placeholder="Select your date of birth"
                       className={`appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm ${
                         isDark
                           ? 'bg-gray-700 border-gray-600 text-white'
@@ -208,6 +168,7 @@ const Auth = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
                   className={`appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm ${
                     isDark
                       ? 'bg-gray-700 border-gray-600 text-white'
@@ -230,28 +191,21 @@ const Auth = () => {
                   type="password"
                   autoComplete="current-password"
                   required
-                  minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
                   className={`appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm ${
                     isDark
                       ? 'bg-gray-700 border-gray-600 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
                   }`}
                 />
-                <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Password must be at least 6 characters long
-                </p>
               </div>
             </div>
 
             {error && (
-              <div className={`p-4 rounded-md ${
-                isDark
-                  ? 'bg-red-900/20 border border-red-900'
-                  : 'bg-red-50 border border-red-200'
-              }`}>
-                <p className={`text-sm ${isDark ? 'text-red-400' : 'text-red-600'}`}>{error}</p>
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 rounded-md">
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
               </div>
             )}
 
@@ -259,11 +213,13 @@ const Auth = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition-colors duration-200 ${
+                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
                   isDark
                     ? 'bg-primary-500 hover:bg-primary-600'
                     : 'bg-primary-600 hover:bg-primary-700'
-                } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500`}
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${
+                  isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 {isLoading ? 'Processing...' : (isLogin ? 'Sign in' : 'Sign up')}
               </button>

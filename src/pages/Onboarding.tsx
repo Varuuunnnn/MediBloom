@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import DatePicker from 'react-datepicker';
+import { format } from 'date-fns';
 
 const Onboarding = () => {
   const [formData, setFormData] = useState({
@@ -98,6 +99,7 @@ const Onboarding = () => {
                   value={formData.height}
                   onChange={(e) => setFormData({ ...formData, height: e.target.value })}
                   className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter your height"
                   required
                 />
               </div>
@@ -108,6 +110,7 @@ const Onboarding = () => {
                   value={formData.weight}
                   onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
                   className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter your weight"
                   required
                 />
               </div>
@@ -120,7 +123,7 @@ const Onboarding = () => {
                 onChange={(date) => setFormData({ ...formData, surgery_date: date })}
                 dateFormat="MMMM d, yyyy"
                 className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholderText="Select date"
+                placeholderText="Select surgery date if applicable"
                 isClearable
               />
             </div>
@@ -132,6 +135,7 @@ const Onboarding = () => {
                 onChange={(e) => setFormData({ ...formData, allergies: e.target.value })}
                 rows={3}
                 className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="List any food allergies you have"
               />
             </div>
 
@@ -163,6 +167,7 @@ const Onboarding = () => {
                   value={formData.emergency_contact}
                   onChange={(e) => setFormData({ ...formData, emergency_contact: e.target.value })}
                   className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter emergency contact name"
                   required
                 />
               </div>
@@ -173,6 +178,7 @@ const Onboarding = () => {
                   value={formData.emergency_phone}
                   onChange={(e) => setFormData({ ...formData, emergency_phone: e.target.value })}
                   className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter emergency contact phone"
                   required
                 />
               </div>
