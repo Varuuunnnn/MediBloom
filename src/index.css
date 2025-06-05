@@ -1,0 +1,57 @@
+@import '@fontsource/inter';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply antialiased text-gray-900 bg-gray-50;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-card shadow-card border border-gray-200 p-6 transition-shadow hover:shadow-card-hover;
+  }
+  
+  .btn-primary {
+    @apply px-4 py-2 bg-primary-600 text-white rounded-button font-medium shadow-button
+    hover:bg-primary-700 hover:shadow-button-hover focus:outline-none focus:ring-2 
+    focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-button 
+    font-medium shadow-button hover:bg-gray-50 hover:shadow-button-hover focus:outline-none 
+    focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200;
+  }
+
+  .icon-container {
+    @apply p-3 rounded-lg flex items-center justify-center;
+  }
+
+  .icon-primary {
+    @apply icon-container bg-primary-100 text-primary-600;
+  }
+
+  .icon-success {
+    @apply icon-container bg-success-100 text-success-600;
+  }
+
+  .icon-warning {
+    @apply icon-container bg-warning-100 text-warning-600;
+  }
+
+  .icon-danger {
+    @apply icon-container bg-danger-100 text-danger-600;
+  }
+}
