@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Calendar, MapPin, Phone, Plus } from 'lucide-react';
+import { Calendar, MapPin, Phone, Plus, Pencil, Trash2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Appointment {
@@ -9,6 +9,7 @@ interface Appointment {
   description: string;
   scheduled_at: string;
   location: string;
+  clinic_id: string;
   clinic: {
     name: string;
     address: string;
@@ -25,8 +26,9 @@ interface Clinic {
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [showNewAppointment, setShowNewAppointment] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [clinics, setClinics] = useState<Clinic[]>([]);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -78,37 +80,92 @@ const Appointments = () => {
     }
   };
 
+  const handleEdit = (appointment: Appointment) => {
+    setEditingAppointment(appointment);
+    setFormData({
+      title: appointment.title,
+      description: appointment.description || '',
+      scheduled_at: format(new Date(appointment.scheduled_at), "yyyy-MM-dd'T'HH:mm"),
+      clinic_id: appointment.clinic_id,
+    });
+    setShowModal(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this appointment?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('appointments')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setAppointments(appointments.filter(app => app.id !== id));
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Find the selected clinic to get its address
       const selectedClinic = clinics.find(clinic => clinic.id === formData.clinic_id);
       if (!selectedClinic) {
         throw new Error('Selected clinic not found');
       }
 
-      const { error } = await supabase.from('appointments').insert({
-        patient_id: user.id,
-        location: selectedClinic.address, // Set the location to the clinic's address
-        ...formData,
-      });
+      if (editingAppointment) {
+        // Update existing appointment
+        const { error } = await supabase
+          .from('appointments')
+          .update({
+            ...formData,
+            location: selectedClinic.address,
+          })
+          .eq('id', editingAppointment.id);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        // Create new appointment
+        const { error } = await supabase
+          .from('appointments')
+          .insert({
+            patient_id: user.id,
+            location: selectedClinic.address,
+            ...formData,
+          });
 
-      setShowNewAppointment(false);
+        if (error) throw error;
+      }
+
+      setShowModal(false);
       setFormData({
         title: '',
         description: '',
         scheduled_at: '',
         clinic_id: '',
       });
+      setEditingAppointment(null);
       fetchAppointments();
     } catch (error) {
-      console.error('Error creating appointment:', error);
+      console.error('Error saving appointment:', error);
     }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingAppointment(null);
+    setFormData({
+      title: '',
+      description: '',
+      scheduled_at: '',
+      clinic_id: '',
+    });
   };
 
   return (
@@ -116,7 +173,7 @@ const Appointments = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Appointments</h1>
         <button
-          onClick={() => setShowNewAppointment(true)}
+          onClick={() => setShowModal(true)}
           className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           <Plus className="h-5 w-5 mr-2" />
@@ -124,10 +181,20 @@ const Appointments = () => {
         </button>
       </div>
 
-      {showNewAppointment && (
+      {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg">
-            <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-white">Schedule New Appointment</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                {editingAppointment ? 'Edit Appointment' : 'Schedule New Appointment'}
+              </h2>
+              <button
+                onClick={closeModal}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -189,7 +256,7 @@ const Appointments = () => {
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   type="button"
-                  onClick={() => setShowNewAppointment(false)}
+                  onClick={closeModal}
                   className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Cancel
@@ -198,7 +265,7 @@ const Appointments = () => {
                   type="submit"
                   className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
                 >
-                  Schedule Appointment
+                  {editingAppointment ? 'Update Appointment' : 'Schedule Appointment'}
                 </button>
               </div>
             </form>
@@ -216,11 +283,27 @@ const Appointments = () => {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {appointment.title}
               </h3>
-              <div className="flex items-center text-primary-600 dark:text-primary-400">
-                <Calendar className="h-5 w-5 mr-2" />
-                <span className="text-sm">
-                  {format(new Date(appointment.scheduled_at), 'PPp')}
-                </span>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center text-primary-600 dark:text-primary-400">
+                  <Calendar className="h-5 w-5 mr-2" />
+                  <span className="text-sm">
+                    {format(new Date(appointment.scheduled_at), 'PPp')}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleEdit(appointment)}
+                    className="p-1 text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400"
+                  >
+                    <Pencil className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(appointment.id)}
+                    className="p-1 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             </div>
 
