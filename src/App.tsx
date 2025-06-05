@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import HealthMetrics from './pages/HealthMetrics';
@@ -14,7 +15,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [currentPage, setCurrentPage] = useState('dashboard');
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Initialize session state
@@ -114,25 +115,19 @@ function App() {
     return <Onboarding />;
   }
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'health-metrics':
-        return <HealthMetrics />;
-      case 'appointments':
-        return <Appointments />;
-      default:
-        return <Dashboard />;
-    }
-  };
-
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Sidebar onNavigate={setCurrentPage} currentPage={currentPage} />
+      <Sidebar onNavigate={(page) => navigate(`/${page}`)} currentPage={location.pathname.substring(1) || 'dashboard'} />
       <div className="flex-1 flex flex-col">
         <Navbar />
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {renderPage()}
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/health-metrics" element={<HealthMetrics />} />
+              <Route path="/appointments" element={<Appointments />} />
+            </Routes>
           </div>
         </main>
       </div>
