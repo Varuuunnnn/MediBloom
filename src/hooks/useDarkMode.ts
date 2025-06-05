@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 export const useDarkMode = () => {
   const [isDark, setIsDark] = useState(() => {
     const savedMode = localStorage.getItem('darkMode');
-    return savedMode ? JSON.parse(savedMode) : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return savedMode !== null ? JSON.parse(savedMode) : true; // Default to dark mode
   });
 
   useEffect(() => {
