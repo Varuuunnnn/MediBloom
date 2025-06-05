@@ -84,8 +84,15 @@ const Appointments = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Find the selected clinic to get its address
+      const selectedClinic = clinics.find(clinic => clinic.id === formData.clinic_id);
+      if (!selectedClinic) {
+        throw new Error('Selected clinic not found');
+      }
+
       const { error } = await supabase.from('appointments').insert({
         patient_id: user.id,
+        location: selectedClinic.address, // Set the location to the clinic's address
         ...formData,
       });
 
