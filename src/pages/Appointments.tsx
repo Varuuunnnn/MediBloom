@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Calendar, MapPin, Phone, Plus, Pencil, Trash2, X } from 'lucide-react';
+import { MapPin, Phone, Plus, Pencil, Trash2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
 
 interface Appointment {
   id: string;
@@ -108,6 +112,21 @@ const Appointments = () => {
     }
   };
 
+  const handleDateSelect = (selectInfo: any) => {
+    setFormData({
+      ...formData,
+      scheduled_at: format(selectInfo.start, "yyyy-MM-dd'T'HH:mm"),
+    });
+    setShowModal(true);
+  };
+
+  const handleEventClick = (clickInfo: any) => {
+    const appointment = appointments.find(app => app.id === clickInfo.event.id);
+    if (appointment) {
+      handleEdit(appointment);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -120,7 +139,6 @@ const Appointments = () => {
       }
 
       if (editingAppointment) {
-        // Update existing appointment
         const { error } = await supabase
           .from('appointments')
           .update({
@@ -131,7 +149,6 @@ const Appointments = () => {
 
         if (error) throw error;
       } else {
-        // Create new appointment
         const { error } = await supabase
           .from('appointments')
           .insert({
@@ -168,6 +185,17 @@ const Appointments = () => {
     });
   };
 
+  const calendarEvents = appointments.map(appointment => ({
+    id: appointment.id,
+    title: appointment.title,
+    start: appointment.scheduled_at,
+    end: new Date(new Date(appointment.scheduled_at).getTime() + 60 * 60 * 1000), // 1 hour duration
+    extendedProps: {
+      description: appointment.description,
+      clinic: appointment.clinic,
+    },
+  }));
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -179,6 +207,39 @@ const Appointments = () => {
           <Plus className="h-5 w-5 mr-2" />
           New Appointment
         </button>
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+        <FullCalendar
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          initialView="timeGridWeek"
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay',
+          }}
+          events={calendarEvents}
+          selectable={true}
+          selectMirror={true}
+          dayMaxEvents={true}
+          weekends={true}
+          select={handleDateSelect}
+          eventClick={handleEventClick}
+          height="auto"
+          eventTimeFormat={{
+            hour: '2-digit',
+            minute: '2-digit',
+            meridiem: false,
+          }}
+          slotMinTime="08:00:00"
+          slotMaxTime="20:00:00"
+          allDaySlot={false}
+          slotDuration="00:30:00"
+          expandRows={true}
+          stickyHeaderDates={true}
+          nowIndicator={true}
+          eventClassNames="cursor-pointer"
+        />
       </div>
 
       {showModal && (
@@ -272,62 +333,6 @@ const Appointments = () => {
           </div>
         </div>
       )}
-
-      <div className="grid gap-6">
-        {appointments.map((appointment) => (
-          <div
-            key={appointment.id}
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {appointment.title}
-              </h3>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center text-primary-600 dark:text-primary-400">
-                  <Calendar className="h-5 w-5 mr-2" />
-                  <span className="text-sm">
-                    {format(new Date(appointment.scheduled_at), 'PPp')}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => handleEdit(appointment)}
-                    className="p-1 text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400"
-                  >
-                    <Pencil className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(appointment.id)}
-                    className="p-1 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {appointment.description && (
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                {appointment.description}
-              </p>
-            )}
-
-            {appointment.clinic && (
-              <div className="space-y-2">
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  <span>{appointment.clinic.address}</span>
-                </div>
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Phone className="h-5 w-5 mr-2" />
-                  <span>{appointment.clinic.phone}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
     </div>
   );
 };
