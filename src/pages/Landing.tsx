@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Heart, Shield, Clock, Users, ChartLine } from 'lucide-react';
+import { Activity, Heart, Shield, Clock, Users, LineChart as ChartLine } from 'lucide-react';
 
 const Landing = ({ onGetStarted }: { onGetStarted: () => void }) => {
   return (
