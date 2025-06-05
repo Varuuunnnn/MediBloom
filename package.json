@@ -12,6 +12,11 @@
   },
   "dependencies": {
     "@fontsource/inter": "^5.0.16",
+    "@fullcalendar/core": "^6.1.10",
+    "@fullcalendar/daygrid": "^6.1.10",
+    "@fullcalendar/interaction": "^6.1.10",
+    "@fullcalendar/react": "^6.1.10",
+    "@fullcalendar/timegrid": "^6.1.10",
     "@supabase/supabase-js": "^2.39.1",
     "date-fns": "^2.30.0",
     "framer-motion": "^10.16.16",
@@ -22,12 +27,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.21.0",
     "recharts": "^2.10.3",
-    "zustand": "^4.4.7",
-    "@fullcalendar/core": "^6.1.10",
-    "@fullcalendar/daygrid": "^6.1.10",
-    "@fullcalendar/interaction": "^6.1.10",
-    "@fullcalendar/react": "^6.1.10",
-    "@fullcalendar/timegrid": "^6.1.10"
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
