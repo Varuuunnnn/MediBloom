@@ -17,38 +17,77 @@ function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Initialize session state
+    const initializeSession = async () => {
+      try {
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error fetching session:', error.message);
+          setSession(null);
+          return;
+        }
+        setSession(initialSession);
+      } catch (err) {
+        console.error('Unexpected error during session fetch:', err);
+        setSession(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      setIsLoading(false);
     });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    initializeSession();
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
     const checkUserAndOnboarding = async () => {
       if (session?.user) {
-        const { data: patientData, error: patientError } = await supabase
-          .from('patients')
-          .select('id')
-          .eq('id', session.user.id)
-          .maybeSingle();
+        try {
+          const { data: patientData, error: patientError } = await supabase
+            .from('patients')
+            .select('id')
+            .eq('id', session.user.id)
+            .maybeSingle();
 
-        if (patientError || !patientData) {
+          if (patientError) {
+            console.error('Error fetching patient data:', patientError.message);
+            await supabase.auth.signOut();
+            setSession(null);
+            return;
+          }
+
+          if (!patientData) {
+            console.warn('No patient record found');
+            await supabase.auth.signOut();
+            setSession(null);
+            return;
+          }
+
+          const { data: detailsData, error: detailsError } = await supabase
+            .from('patient_details')
+            .select('*')
+            .eq('patient_id', session.user.id)
+            .maybeSingle();
+          
+          if (detailsError) {
+            console.error('Error fetching patient details:', detailsError.message);
+          }
+
+          setHasCompletedOnboarding(!!detailsData);
+        } catch (err) {
+          console.error('Unexpected error during user check:', err);
           await supabase.auth.signOut();
           setSession(null);
-          return;
         }
-
-        const { data: detailsData } = await supabase
-          .from('patient_details')
-          .select('*')
-          .eq('patient_id', session.user.id)
-          .maybeSingle();
-        
-        setHasCompletedOnboarding(!!detailsData);
       }
     };
 
