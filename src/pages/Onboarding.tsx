@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
-import DatePicker from 'react-datepicker';
 import { format } from 'date-fns';
 
 const Onboarding = () => {
