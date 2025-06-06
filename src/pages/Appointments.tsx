@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Calendar, MapPin, Phone, Plus, Pencil, Trash2, X } from 'lucide-react';
+import { Calendar, MapPin, Phone, Plus, Pencil, Trash2, X, Video } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import VideoCall from '../components/VideoCall';
 
 interface Appointment {
   id: string;
@@ -29,6 +30,7 @@ const Appointments = () => {
   const [showModal, setShowModal] = useState(false);
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [activeCall, setActiveCall] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -168,6 +170,10 @@ const Appointments = () => {
     });
   };
 
+  const startVideoCall = (appointmentId: string) => {
+    setActiveCall(appointmentId);
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -292,6 +298,12 @@ const Appointments = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
+                    onClick={() => startVideoCall(appointment.id)}
+                    className="p-1 text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+                  >
+                    <Video className="h-5 w-5" />
+                  </button>
+                  <button
                     onClick={() => handleEdit(appointment)}
                     className="p-1 text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400"
                   >
@@ -328,6 +340,13 @@ const Appointments = () => {
           </div>
         ))}
       </div>
+
+      {activeCall && (
+        <VideoCall
+          appointmentId={activeCall}
+          onClose={() => setActiveCall(null)}
+        />
+      )}
     </div>
   );
 };
