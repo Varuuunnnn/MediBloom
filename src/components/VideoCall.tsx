@@ -11,6 +11,7 @@ interface VideoCallProps {
 const VideoCall: React.FC<VideoCallProps> = ({ appointmentId, onClose }) => {
   const [room, setRoom] = useState<Room | null>(null);
   const [token, setToken] = useState<string>('');
+  const [error, setError] = useState<string>('');
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const localVideoRef = useRef<HTMLDivElement>(null);
@@ -20,9 +21,11 @@ const VideoCall: React.FC<VideoCallProps> = ({ appointmentId, onClose }) => {
     const getToken = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        if (!user) {
+          setError('User not authenticated');
+          return;
+        }
 
-        // Call your Supabase Edge Function to get Twilio token
         const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/video-token`, {
           method: 'POST',
           headers: {
@@ -35,11 +38,22 @@ const VideoCall: React.FC<VideoCallProps> = ({ appointmentId, onClose }) => {
           }),
         });
 
-        const { token } = await response.json();
-        setToken(token);
-        connectToRoom(token);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to get video token');
+        }
+
+        const data = await response.json();
+        
+        if (!data.token || typeof data.token !== 'string') {
+          throw new Error('Invalid token received from server');
+        }
+
+        setToken(data.token);
+        await connectToRoom(data.token);
       } catch (error) {
         console.error('Error getting token:', error);
+        setError(error instanceof Error ? error.message : 'Failed to initialize video call');
       }
     };
 
@@ -54,6 +68,10 @@ const VideoCall: React.FC<VideoCallProps> = ({ appointmentId, onClose }) => {
 
   const connectToRoom = async (token: string) => {
     try {
+      if (!token || typeof token !== 'string') {
+        throw new Error('Invalid token provided');
+      }
+
       const videoRoom = await connect(token, {
         name: appointmentId,
         audio: true,
@@ -101,6 +119,7 @@ const VideoCall: React.FC<VideoCallProps> = ({ appointmentId, onClose }) => {
       });
     } catch (error) {
       console.error('Error connecting to room:', error);
+      setError(error instanceof Error ? error.message : 'Failed to connect to video room');
     }
   };
 
@@ -140,6 +159,23 @@ const VideoCall: React.FC<VideoCallProps> = ({ appointmentId, onClose }) => {
     }
     onClose();
   };
+
+  if (error) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full">
+          <h3 className="text-xl font-semibold text-red-600 mb-4">Video Call Error</h3>
+          <p className="text-gray-700 dark:text-gray-300 mb-6">{error}</p>
+          <button
+            onClick={onClose}
+            className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
